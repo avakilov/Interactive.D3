@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>MLB Team Performance Over Time</title>
+  <title>From Players to Teams: Performance Trends and Aging Patterns in Baseball History</title>
 
   <style>
     body {
@@ -13,36 +13,51 @@
 
     h1 { margin-bottom: 6px; }
 
-    p { max-width: 900px; font-size: 14px; }
+    p {
+      max-width: 900px;
+      font-size: 14px;
+      margin-bottom: 18px;
+    }
 
     .controls {
-      margin: 15px 0;
       display: flex;
-      gap: 14px;
+      flex-wrap: wrap;
       align-items: center;
-      font-size: 14px;
+      gap: 16px;
+      margin-bottom: 14px;
+    }
+
+    select, input[type=range] {
+      padding: 4px;
+      font-size: 13px;
     }
 
     .chart-container {
       background: white;
+      padding: 20px;
       border-radius: 10px;
-      padding: 15px;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
     }
 
-    svg { width: 100%; height: 420px; }
+    svg {
+      width: 100%;
+      height: 420px;
+    }
 
     .tooltip {
       position: absolute;
+      padding: 6px;
       background: white;
       border: 1px solid gray;
-      font-size: 12px;
-      padding: 6px;
+      border-radius: 4px;
       pointer-events: none;
       opacity: 0;
+      font-size: 12px;
     }
 
-    .legend text { font-size: 12px; }
+    .legend text {
+      font-size: 12px;
+    }
   </style>
 </head>
 
@@ -51,11 +66,12 @@
 <h1>MLB Teams – Performance Over Time</h1>
 
 <p>
-Explore how Major League Baseball teams evolve offensively and defensively over time.
-Compare leagues, track individual teams, and switch between performance metrics to
-understand long-term trends. Hover over the chart to view exact values.
+Explore the long-term performance of Major League Baseball teams.  
+This visualization shows Runs/Game and Hits/Game simultaneously, with the option
+to highlight a specific team, filter by league, and limit the year range.
 </p>
 
+<!-- FILTERS -->
 <div class="controls">
   <label>League:
     <select id="leagueFilter">
@@ -70,24 +86,24 @@ understand long-term trends. Hover over the chart to view exact values.
     </select>
   </label>
 
-  <label>
-    <input type="radio" name="metric" value="runs" checked>
-    Runs / Game
+  <label>Metrics:
+    <select id="metricSelector">
+      <option value="both">Runs + Hits</option>
+      <option value="runs">Runs/Game Only</option>
+      <option value="hits">Hits/Game Only</option>
+    </select>
   </label>
 
-  <label>
-    <input type="radio" name="metric" value="hits">
-    Hits / Game
-  </label>
-
-  <label>
-    <input type="radio" name="metric" value="strikeouts">
-    Strikeouts / Game
+  <label style="margin-left:20px;">
+    Year Range:
+    <input type="range" id="yearSlider" min="1960" max="2015" value="2015" />
+    <span id="yearLabel">1960–2015</span>
   </label>
 </div>
 
+<!-- CHART -->
 <div class="chart-container">
-  <h3 id="chartTitle"></h3>
+  <h3 id="chartTitle">League Performance Over Time</h3>
   <svg id="linechart"></svg>
 </div>
 

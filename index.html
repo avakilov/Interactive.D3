@@ -1,135 +1,93 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>From Players to Teams: Performance Trends and Aging Patterns in Baseball History</title>
+  <meta charset="UTF-8">
+  <title>MLB Team Performance Over Time</title>
 
   <style>
     body {
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      font-family: system-ui, sans-serif;
       margin: 20px;
       background: #f7f7f7;
     }
 
-    h1 {
-      margin-bottom: 0.25rem;
-    }
+    h1 { margin-bottom: 6px; }
 
-    p {
-      max-width: 900px;
-      font-size: 0.95rem;
-    }
+    p { max-width: 900px; font-size: 14px; }
 
     .controls {
-      margin-top: 16px;
+      margin: 15px 0;
       display: flex;
-      flex-wrap: wrap;
-      gap: 16px;
+      gap: 14px;
       align-items: center;
       font-size: 14px;
     }
 
-    .controls label {
-      font-weight: 500;
-      margin-right: 4px;
-    }
-
-    select {
-      padding: 3px 6px;
-      font-size: 13px;
-    }
-
     .chart-container {
-      margin-top: 24px;
       background: white;
       border-radius: 10px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.08);
-      padding: 16px 20px 24px;
+      padding: 15px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
     }
 
-    .chart-title {
-      font-weight: 600;
-      margin-bottom: 8px;
-    }
-
-    .metric-group {
-      display: inline-flex;
-      gap: 10px;
-      align-items: center;
-    }
-
-    svg {
-      width: 100%;
-      height: 420px;
-    }
-
-    .axis-label {
-      font-size: 12px;
-      fill: #444;
-    }
+    svg { width: 100%; height: 420px; }
 
     .tooltip {
       position: absolute;
-      padding: 6px 8px;
       background: white;
-      border: 1px solid #999;
-      border-radius: 4px;
+      border: 1px solid gray;
       font-size: 12px;
+      padding: 6px;
       pointer-events: none;
       opacity: 0;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.15);
     }
 
-    .legend {
-      font-size: 11px;
-    }
-
-    .legend rect {
-      stroke: #333;
-      stroke-width: 0.5px;
-    }
+    .legend text { font-size: 12px; }
   </style>
 </head>
+
 <body>
 
-<h1>MLB Teams – Performance Trends Over Time</h1>
+<h1>MLB Teams – Performance Over Time</h1>
 
 <p>
-This interactive visualization shows how baseball team performance changes across seasons.
-Users can compare league-wide trends and individual teams across offensive performance,
-batting success, and pitching strikeout rates.
-The chart allows filtering by league and team, and switching between key metrics.
-Hover over the line or points to view detailed yearly values.
+Explore how Major League Baseball teams evolve offensively and defensively over time.
+Compare leagues, track individual teams, and switch between performance metrics to
+understand long-term trends. Hover over the chart to view exact values.
 </p>
 
 <div class="controls">
-  <div>
-    <label for="leagueFilter">League:</label>
+  <label>League:
     <select id="leagueFilter">
-      <option value="All">All leagues</option>
       <option value="AL">AL</option>
       <option value="NL">NL</option>
     </select>
-  </div>
+  </label>
 
-  <div>
-    <label for="teamFilter">Team:</label>
+  <label>Team:
     <select id="teamFilter">
-      <option value="All">All teams</option>
+      <option value="All">All Teams</option>
     </select>
-  </div>
+  </label>
 
-  <div class="metric-group">
-    <label><input type="radio" name="metric" value="runs" checked> Runs / Game</label>
-    <label><input type="radio" name="metric" value="batting"> Hits / Game</label>
-    <label><input type="radio" name="metric" value="strikeouts"> Strikeouts / Game</label>
-  </div>
+  <label>
+    <input type="radio" name="metric" value="runs" checked>
+    Runs / Game
+  </label>
+
+  <label>
+    <input type="radio" name="metric" value="hits">
+    Hits / Game
+  </label>
+
+  <label>
+    <input type="radio" name="metric" value="strikeouts">
+    Strikeouts / Game
+  </label>
 </div>
 
 <div class="chart-container">
-  <div class="chart-title" id="lineChartTitle">
-    League-Average Runs per Game Over Time
-  </div>
+  <h3 id="chartTitle"></h3>
   <svg id="linechart"></svg>
 </div>
 
@@ -137,5 +95,6 @@ Hover over the line or points to view detailed yearly values.
 
 <script src="https://d3js.org/d3.v7.min.js"></script>
 <script src="main.js"></script>
+
 </body>
 </html>

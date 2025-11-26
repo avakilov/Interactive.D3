@@ -1,42 +1,64 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>From Players to Teams: Performance Trends and Aging Patterns in Baseball History</title>
-
+  <meta charset="UTF-8" />
+  <title>MLB Teams – D3 Visualizations</title>
   <style>
     body {
-      font-family: system-ui, sans-serif;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
       margin: 20px;
       background: #f7f7f7;
     }
 
-    h1 { margin-bottom: 6px; }
+    h1 {
+      margin-bottom: 0.25rem;
+    }
 
     p {
       max-width: 900px;
-      font-size: 14px;
-      margin-bottom: 18px;
+      font-size: 0.95rem;
     }
 
     .controls {
+      margin-top: 16px;
       display: flex;
       flex-wrap: wrap;
-      align-items: center;
       gap: 16px;
-      margin-bottom: 14px;
+      align-items: center;
+      font-size: 14px;
     }
 
-    select, input[type=range] {
-      padding: 4px;
+    .controls label {
+      font-weight: 500;
+      margin-right: 4px;
+    }
+
+    select {
+      padding: 3px 6px;
       font-size: 13px;
     }
 
     .chart-container {
-      background: white;
-      padding: 20px;
+      margin-top: 24px;
+      background: #ffffff;
       border-radius: 10px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+      padding: 16px 20px 24px;
+    }
+
+    .slider-row {
+      margin-bottom: 10px;
+      font-size: 14px;
+      color: #333;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .chart-title {
+      font-weight: 600;
+      margin-bottom: 8px;
     }
 
     svg {
@@ -44,73 +66,77 @@
       height: 420px;
     }
 
-    .tooltip {
-      position: absolute;
-      padding: 6px;
-      background: white;
-      border: 1px solid gray;
-      border-radius: 4px;
-      pointer-events: none;
-      opacity: 0;
+    .axis-label {
       font-size: 12px;
+      fill: #444;
     }
 
-    .legend text {
+    .tooltip {
+      position: absolute;
+      padding: 6px 8px;
+      background: white;
+      border: 1px solid #999;
+      border-radius: 4px;
       font-size: 12px;
+      pointer-events: none;
+      opacity: 0;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.15);
+    }
+
+    .legend {
+      font-size: 11px;
     }
   </style>
 </head>
-
 <body>
 
-<h1>MLB Teams – Performance Over Time</h1>
+  <h1>MLB Teams – D3 Visualizations</h1>
+  <p>
+    This interactive line chart shows how team performance changes over time. 
+    You can filter by league (AL or NL), highlight a specific team, and adjust the year range. 
+    The chart can display runs per game, hits per game, or both at the same time. 
+    Hover over any point to see detailed information for that season.
+  </p>
 
-<p>
-Explore the long-term performance of Major League Baseball teams.  
-This visualization shows Runs/Game and Hits/Game simultaneously, with the option
-to highlight a specific team, filter by league, and limit the year range.
-</p>
+  <div class="controls">
+    <div>
+      <label for="leagueFilter">League:</label>
+      <select id="leagueFilter">
+        <option value="AL">AL</option>
+        <option value="NL">NL</option>
+      </select>
+    </div>
 
-<!-- FILTERS -->
-<div class="controls">
-  <label>League:
-    <select id="leagueFilter">
-      <option value="AL">AL</option>
-      <option value="NL">NL</option>
-    </select>
-  </label>
+    <div>
+      <label for="teamFilter">Team:</label>
+      <select id="teamFilter">
+        <option value="All">All teams</option>
+      </select>
+    </div>
+  </div>
 
-  <label>Team:
-    <select id="teamFilter">
-      <option value="All">All Teams</option>
-    </select>
-  </label>
+  <div class="chart-container">
+    <div class="slider-row">
+      <span>Line Chart Year Range:</span>
+      <input type="range" id="lineYearMin" />
+      <input type="range" id="lineYearMax" />
+      <span id="lineYearLabel"></span>
 
-  <label>Metrics:
-    <select id="metricSelector">
-      <option value="both">Runs + Hits</option>
-      <option value="runs">Runs/Game Only</option>
-      <option value="hits">Hits/Game Only</option>
-    </select>
-  </label>
+      <span style="margin-left:16px;">Metric:</span>
+      <label><input type="radio" name="metric" value="both" checked> Both</label>
+      <label><input type="radio" name="metric" value="runs"> Runs/Game</label>
+      <label><input type="radio" name="metric" value="hits"> Hits/Game</label>
+    </div>
 
-  <label style="margin-left:20px;">
-    Year Range:
-    <input type="range" id="yearSlider" min="1960" max="2015" value="2015" />
-    <span id="yearLabel">1960–2015</span>
-  </label>
-</div>
+    <div class="chart-title" id="lineChartTitle">
+      League-Average Runs and Hits per Game by Year
+    </div>
+    <svg id="linechart"></svg>
+  </div>
 
-<!-- CHART -->
-<div class="chart-container">
-  <h3 id="chartTitle">League Performance Over Time</h3>
-  <svg id="linechart"></svg>
-</div>
+  <div class="tooltip" id="tooltip"></div>
 
-<div class="tooltip" id="tooltip"></div>
-
-<script src="https://d3js.org/d3.v7.min.js"></script>
-<script src="main.js"></script>
-
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+  <script src="main.js"></script>
 </body>
 </html>

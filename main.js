@@ -1,176 +1,114 @@
-// main.js
-
 let fullData = [];
-let leaguesAll = [];
-let colorScale;
-
-// current filter state
 let currentLeague = "All";
 let currentTeam = "All";
-let currentMetric = "runs"; // "runs", "batting", "pitching"
+let currentMetric = "runs";
 
 const tooltip = d3.select("#tooltip");
 
-// ----------------------------------------------------
-// Load data
-// ----------------------------------------------------
+// ------------------------------------
+// Load Data
+// ------------------------------------
 d3.csv("Teams.csv", d3.autoType).then(data => {
-  // modern era + valid stats
-  fullData = data.filter(d => d.yearID >= 1960 && d.G && d.R && d.W);
+  fullData = data.filter(d => d.yearID >= 1960 && d.G && d.R && d.H);
 
   fullData.forEach(d => {
     d.runsPerGame = d.R / d.G;
-    d.battingPerGame = d.H / d.G;      // hits per game as batting metric
-    // RA is runs allowed; if not present, you can change this to ER or similar
-    d.pitchingPerGame = d.RA ? d.RA / d.G : d.ER / d.G; 
+    d.battingPerGame = d.H / d.G;
+    d.strikeoutsPerGame = d.SO ? d.SO / d.G : null;
   });
 
-  // league list + color scale
-  leaguesAll = Array.from(new Set(fullData.map(d => d.lgID))).sort();
-  colorScale = d3.scaleOrdinal()
-    .domain(leaguesAll)
-    .range(d3.schemeTableau10);
-
-  setupLeagueFilter();
   setupTeamFilter();
-  setupLineSlider();
-  setupMetricControls();
-
+  setupControls();
   updateLine();
 });
 
-// ----------------------------------------------------
-// Helper: current filtered base (by league only)
-// ----------------------------------------------------
-function getLeagueFilteredData() {
-  if (currentLeague === "All") return fullData;
-  return fullData.filter(d => d.lgID === currentLeague);
+// ------------------------------------
+// Filters
+// ------------------------------------
+function getFilteredData() {
+  let result = fullData;
+
+  if (currentLeague !== "All") {
+    result = result.filter(d => d.lgID === currentLeague);
+  }
+
+  return result;
 }
 
-// ----------------------------------------------------
-// League & Team filters
-// ----------------------------------------------------
-function setupLeagueFilter() {
-  const select = document.getElementById("leagueFilter");
-
-  leaguesAll.forEach(lg => {
-    const opt = document.createElement("option");
-    opt.value = lg;
-    opt.textContent = lg;
-    select.appendChild(opt);
-  });
-
-  select.onchange = () => {
-    currentLeague = select.value;
-    setupTeamFilter(); // rebuild team list for this league
+function setupControls() {
+  document.getElementById("leagueFilter").onchange = e => {
+    currentLeague = e.target.value;
+    setupTeamFilter();
     updateLine();
   };
-}
 
-function setupTeamFilter() {
-  const select = document.getElementById("teamFilter");
-  const base = getLeagueFilteredData();
-
-  const teams = Array.from(new Set(base.map(d => d.name))).sort();
-
-  select.innerHTML = "";
-  const optAll = document.createElement("option");
-  optAll.value = "All";
-  optAll.textContent = "All teams";
-  select.appendChild(optAll);
-
-  teams.forEach(t => {
-    const opt = document.createElement("option");
-    opt.value = t;
-    opt.textContent = t;
-    select.appendChild(opt);
-  });
-
-  currentTeam = "All";
-  select.onchange = () => {
-    currentTeam = select.value;
+  document.getElementById("teamFilter").onchange = e => {
+    currentTeam = e.target.value;
     updateLine();
   };
-}
 
-// ----------------------------------------------------
-// Metric controls
-// ----------------------------------------------------
-function setupMetricControls() {
-  const radios = document.querySelectorAll('input[name="metric"]');
-  radios.forEach(r => {
-    r.onchange = () => {
-      if (r.checked) {
-        currentMetric = r.value;
+  document.querySelectorAll('input[name="metric"]').forEach(radio => {
+    radio.onchange = () => {
+      if (radio.checked) {
+        currentMetric = radio.value;
         updateLine();
       }
     };
   });
 }
 
-// ----------------------------------------------------
-// Slider
-// ----------------------------------------------------
-function setupLineSlider() {
-  const minYear = d3.min(fullData, d => d.yearID);
-  const maxYear = d3.max(fullData, d => d.yearID);
+function setupTeamFilter() {
+  const select = document.getElementById("teamFilter");
+  const base = getFilteredData();
 
-  const minInput = document.getElementById("lineYearMin");
-  const maxInput = document.getElementById("lineYearMax");
+  const teams = Array.from(new Set(base.map(d => d.name))).sort();
 
-  minInput.min = minYear;
-  minInput.max = maxYear;
-  maxInput.min = minYear;
-  maxInput.max = maxYear;
-  minInput.value = minYear;
-  maxInput.value = maxYear;
+  select.innerHTML = "";
+  const allOpt = document.createElement("option");
+  allOpt.value = "All";
+  allOpt.textContent = "All teams";
+  select.appendChild(allOpt);
 
-  minInput.oninput = updateLine;
-  maxInput.oninput = updateLine;
+  teams.forEach(team => {
+    const opt = document.createElement("option");
+    opt.value = team;
+    opt.textContent = team;
+    select.appendChild(opt);
+  });
+
+  currentTeam = "All";
 }
 
-// ----------------------------------------------------
-// Utility: get metric value + labels
-// ----------------------------------------------------
+// ------------------------------------
+// Metric Helpers
+// ------------------------------------
 function metricValue(d) {
   if (currentMetric === "batting") return d.battingPerGame;
-  if (currentMetric === "pitching") return d.pitchingPerGame;
-  return d.runsPerGame; // default runs
+  if (currentMetric === "strikeouts") return d.strikeoutsPerGame;
+  return d.runsPerGame;
 }
 
-function metricAxisLabel() {
+function metricLabel() {
   if (currentMetric === "batting") return "Avg Hits per Game";
-  if (currentMetric === "pitching") return "Avg Runs Allowed per Game";
+  if (currentMetric === "strikeouts") return "Avg Strikeouts per Game";
   return "Avg Runs per Game";
 }
 
-function metricChartTitle() {
-  if (currentMetric === "batting") return "League-Average Hits per Game by Year";
-  if (currentMetric === "pitching") return "League-Average Runs Allowed per Game by Year";
-  return "League-Average Runs per Game by Year";
+function titleLabel() {
+  if (currentMetric === "batting") return "League-Average Hits per Game Over Time";
+  if (currentMetric === "strikeouts") return "League-Average Strikeouts per Game Over Time";
+  return "League-Average Runs per Game Over Time";
 }
 
-function metricTooltipLabel() {
-  if (currentMetric === "batting") return "Hits/game";
-  if (currentMetric === "pitching") return "Runs allowed/game";
-  return "Runs/game";
-}
-
-// ----------------------------------------------------
-// Line chart
-// ----------------------------------------------------
+// ------------------------------------
+// Draw Line Chart
+// ------------------------------------
 function updateLine() {
-  const minY = +document.getElementById("lineYearMin").value;
-  const maxY = +document.getElementById("lineYearMax").value;
-  document.getElementById("lineYearLabel").textContent = `${minY} – ${maxY}`;
-
-  document.getElementById("lineChartTitle").textContent = metricChartTitle();
-
-  const base = getLeagueFilteredData();
-  const subset = base.filter(d => d.yearID >= minY && d.yearID <= maxY);
+  document.getElementById("lineChartTitle").textContent = titleLabel();
+  const data = getFilteredData();
 
   d3.select("#linechart").selectAll("*").remove();
-  drawLine(subset);
+  drawLine(data);
 }
 
 function drawLine(data) {
@@ -179,66 +117,52 @@ function drawLine(data) {
   const height = svg.node().clientHeight;
   const margin = { top: 30, right: 140, bottom: 50, left: 60 };
 
+  const g = svg.append("g")
+    .attr("transform", `translate(${margin.left},${margin.top})`);
+
   const innerWidth = width - margin.left - margin.right;
   const innerHeight = height - margin.top - margin.bottom;
 
-  const g = svg.append("g")
-               .attr("transform", `translate(${margin.left},${margin.top})`);
-
-  if (!data.length) return;
-
-  // League-average per year (for current metric)
-  const byYear = d3.rollup(
+  const yearly = d3.rollup(
     data,
     v => d3.mean(v, d => metricValue(d)),
     d => d.yearID
   );
 
-  const leagueSeries = Array.from(byYear, ([year, value]) => ({
-    year: +year,
-    value
-  })).sort((a, b) => a.year - b.year);
+  const leagueSeries = Array.from(yearly, ([year, val]) => ({ year, val }))
+    .filter(d => d.val !== null)
+    .sort((a,b)=>a.year-b.year);
 
-  const allYears = leagueSeries.map(d => d.year);
-  const allVals = leagueSeries.map(d => d.value);
-
-  // Optional team series
   let teamSeries = [];
   if (currentTeam !== "All") {
     const teamData = data.filter(d => d.name === currentTeam);
-    const teamByYear = d3.rollup(
+    const teamMap = d3.rollup(
       teamData,
       v => d3.mean(v, d => metricValue(d)),
       d => d.yearID
     );
-    teamSeries = Array.from(teamByYear, ([year, value]) => ({
-      year: +year,
-      value
-    })).sort((a, b) => a.year - b.year);
-
-    teamSeries.forEach(d => {
-      allYears.push(d.year);
-      allVals.push(d.value);
-    });
+    teamSeries = Array.from(teamMap, ([year, val]) => ({year,val}))
+      .filter(d => d.val !== null)
+      .sort((a,b)=>a.year-b.year);
   }
 
   const x = d3.scaleLinear()
-              .domain(d3.extent(allYears))
-              .range([0, innerWidth]);
+    .domain(d3.extent(leagueSeries, d=>d.year))
+    .range([0, innerWidth]);
 
   const y = d3.scaleLinear()
-              .domain(d3.extent(allVals)).nice()
-              .range([innerHeight, 0]);
+    .domain(d3.extent([...leagueSeries, ...teamSeries], d=>d.val)).nice()
+    .range([innerHeight, 0]);
 
   g.append("g")
-   .attr("transform", `translate(0,${innerHeight})`)
-   .call(d3.axisBottom(x).tickFormat(d3.format("d")));
+    .attr("transform", `translate(0,${innerHeight})`)
+    .call(d3.axisBottom(x).tickFormat(d3.format("d")));
 
   g.append("g").call(d3.axisLeft(y));
 
   g.append("text")
     .attr("class", "axis-label")
-    .attr("x", innerWidth / 2)
+    .attr("x", innerWidth/2)
     .attr("y", innerHeight + 40)
     .attr("text-anchor", "middle")
     .text("Year");
@@ -246,125 +170,77 @@ function drawLine(data) {
   g.append("text")
     .attr("class", "axis-label")
     .attr("transform", "rotate(-90)")
-    .attr("x", -innerHeight / 2)
+    .attr("x", -innerHeight/2)
     .attr("y", -45)
     .attr("text-anchor", "middle")
-    .text(metricAxisLabel());
+    .text(metricLabel());
 
-  const lineGen = d3.line()
-    .x(d => x(d.year))
-    .y(d => y(d.value));
+  const line = d3.line()
+    .x(d=>x(d.year))
+    .y(d=>y(d.val));
 
-  // League line (blue)
+  // League line
   const leaguePath = g.append("path")
     .datum(leagueSeries)
-    .attr("fill", "none")
-    .attr("stroke", "#1f77b4")
-    .attr("stroke-width", 2)
-    .attr("d", lineGen);
+    .attr("fill","none")
+    .attr("stroke","#1f77b4")
+    .attr("stroke-width",2)
+    .attr("d",line);
 
-  const totalLength = leaguePath.node().getTotalLength();
+  const len = leaguePath.node().getTotalLength();
   leaguePath
-    .attr("stroke-dasharray", totalLength + " " + totalLength)
-    .attr("stroke-dashoffset", totalLength)
+    .attr("stroke-dasharray", `${len} ${len}`)
+    .attr("stroke-dashoffset", len)
     .transition()
     .duration(800)
     .attr("stroke-dashoffset", 0);
 
-  // League points
-  g.selectAll("circle.league-point")
-    .data(leagueSeries)
-    .join("circle")
-    .attr("class", "league-point")
-    .attr("cx", d => x(d.year))
-    .attr("cy", d => y(d.value))
-    .attr("r", 3)
-    .attr("fill", "#1f77b4")
-    .on("mouseover", (event, d) => {
-      tooltip
-        .style("opacity", 1)
-        .html(
-          `Year: ${d.year}<br/>League avg ${metricTooltipLabel()}: ${d.value.toFixed(2)}`
-        );
-    })
-    .on("mousemove", event => {
-      tooltip
-        .style("left", event.pageX + 12 + "px")
-        .style("top", event.pageY - 28 + "px");
-    })
-    .on("mouseout", () => tooltip.style("opacity", 0));
-
-  // Team line (red), if selected
+  // Team line
   if (teamSeries.length) {
     const teamPath = g.append("path")
       .datum(teamSeries)
-      .attr("fill", "none")
-      .attr("stroke", "#e53935")
-      .attr("stroke-width", 2)
-      .attr("d", lineGen);
+      .attr("fill","none")
+      .attr("stroke","#e53935")
+      .attr("stroke-width",2)
+      .attr("d",line);
 
-    const lenTeam = teamPath.node().getTotalLength();
+    const len2 = teamPath.node().getTotalLength();
     teamPath
-      .attr("stroke-dasharray", lenTeam + " " + lenTeam)
-      .attr("stroke-dashoffset", lenTeam)
+      .attr("stroke-dasharray", `${len2} ${len2}`)
+      .attr("stroke-dashoffset", len2)
       .transition()
       .duration(800)
       .attr("stroke-dashoffset", 0);
-
-    g.selectAll("circle.team-point")
-      .data(teamSeries)
-      .join("circle")
-      .attr("class", "team-point")
-      .attr("cx", d => x(d.year))
-      .attr("cy", d => y(d.value))
-      .attr("r", 3.5)
-      .attr("fill", "#e53935")
-      .on("mouseover", (event, d) => {
-        tooltip
-          .style("opacity", 1)
-          .html(
-            `<strong>${currentTeam}</strong><br/>
-             Year: ${d.year}<br/>
-             ${metricTooltipLabel()}: ${d.value.toFixed(2)}`
-          );
-      })
-      .on("mousemove", event => {
-        tooltip
-          .style("left", event.pageX + 12 + "px")
-          .style("top", event.pageY - 28 + "px");
-      })
-      .on("mouseout", () => tooltip.style("opacity", 0));
   }
 
-  // Legend (League vs Team)
+  // Tooltips
+  g.selectAll(".league-point")
+    .data(leagueSeries)
+    .join("circle")
+    .attr("class","league-point")
+    .attr("r",3)
+    .attr("cx",d=>x(d.year))
+    .attr("cy",d=>y(d.val))
+    .attr("fill","#1f77b4")
+    .on("mouseover", (e,d)=> {
+      tooltip.style("opacity",1)
+        .html(`Year: ${d.year}<br/>${metricLabel()}: ${d.val.toFixed(2)}`);
+    })
+    .on("mousemove", e=>{
+      tooltip.style("left",e.pageX+12+"px").style("top",e.pageY-28+"px");
+    })
+    .on("mouseout", ()=>tooltip.style("opacity",0));
+
+  // Legend
   const legend = g.append("g")
-    .attr("class", "legend")
-    .attr("transform", `translate(${innerWidth + 20}, 10)`);
+    .attr("class","legend")
+    .attr("transform", `translate(${innerWidth+20}, 10)`);
 
-  legend.append("text")
-    .text("Lines")
-    .attr("font-weight", "600")
-    .attr("y", 0);
+  legend.append("text").text("Legend").attr("font-weight","600");
 
-  const row1 = legend.append("g")
-    .attr("transform", "translate(0, 15)");
-  row1.append("rect")
-    .attr("width", 12)
-    .attr("height", 12)
-    .attr("fill", "#1f77b4");
-  row1.append("text")
-    .attr("x", 18)
-    .attr("y", 10)
-    .text("League average");
+  legend.append("rect").attr("y",10).attr("width",12).attr("height",12).attr("fill","#1f77b4");
+  legend.append("text").attr("x",18).attr("y",20).text("League average");
 
-  const row2 = legend.append("g")
-    .attr("transform", "translate(0, 33)");
-  row2.append("rect")
-    .attr("width", 12)
-    .attr("height", 12)
-    .attr("fill", "#e53935");
-  row2.append("text")
-    .attr("x", 18)
-    .attr("y", 10)
-    .text(currentTeam === "All" ? "Selected team" : currentTeam);
+  legend.append("rect").attr("y",30).attr("width",12).attr("height",12).attr("fill","#e53935");
+  legend.append("text").attr("x",18).attr("y",40).text(currentTeam === "All" ? "Selected team" : currentTeam);
 }

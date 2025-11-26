@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <title>From Players to Teams: Performance Trends and Aging Patterns in Baseball History</title>
+
   <style>
     body {
       font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
@@ -40,7 +41,7 @@
 
     .chart-container {
       margin-top: 24px;
-      background: #ffffff;
+      background: white;
       border-radius: 10px;
       box-shadow: 0 2px 6px rgba(0,0,0,0.08);
       padding: 16px 20px 24px;
@@ -49,6 +50,12 @@
     .chart-title {
       font-weight: 600;
       margin-bottom: 8px;
+    }
+
+    .metric-group {
+      display: inline-flex;
+      gap: 10px;
+      align-items: center;
     }
 
     svg {
@@ -73,22 +80,6 @@
       box-shadow: 0 2px 5px rgba(0,0,0,0.15);
     }
 
-    .slider-row {
-      margin-bottom: 10px;
-      font-size: 14px;
-      color: #333;
-      display: flex;
-      flex-wrap: wrap;
-      gap: 12px;
-      align-items: center;
-    }
-
-    .metric-group {
-      display: inline-flex;
-      gap: 8px;
-      align-items: center;
-    }
-
     .legend {
       font-size: 11px;
     }
@@ -101,59 +92,50 @@
 </head>
 <body>
 
-  <h1>MLB Teams – D3 Visualizations</h1>
-  <p>
-    This interactive visualization explores how baseball teams’ performance changes over time. 
-    Using historical team-season data, it shows how offensive production, batting, and pitching 
-    evolve across years and how individual teams compare to league-wide trends. 
-    Users can filter by league, select specific teams, and adjust the year range to focus on 
-    particular eras of baseball history. Hover over points on the line to see more details for each season.
-  </p>
+<h1>MLB Teams – Performance Trends Over Time</h1>
 
-  <!-- GLOBAL CONTROLS (for the line chart) -->
-  <div class="controls">
-    <div>
-      <label for="leagueFilter">League:</label>
-      <select id="leagueFilter">
-        <option value="All">All leagues</option>
-      </select>
-    </div>
+<p>
+This interactive visualization shows how baseball team performance changes across seasons.
+Users can compare league-wide trends and individual teams across offensive performance,
+batting success, and pitching strikeout rates.
+The chart allows filtering by league and team, and switching between key metrics.
+Hover over the line or points to view detailed yearly values.
+</p>
 
-    <div>
-      <label for="teamFilter">Team:</label>
-      <select id="teamFilter">
-        <option value="All">All teams</option>
-      </select>
-    </div>
+<div class="controls">
+  <div>
+    <label for="leagueFilter">League:</label>
+    <select id="leagueFilter">
+      <option value="All">All leagues</option>
+      <option value="AL">AL</option>
+      <option value="NL">NL</option>
+    </select>
   </div>
 
-  <!-- SINGLE LINE CHART -->
-  <div class="chart-container">
-    <div class="slider-row">
-      <span>Year Range:</span>
-      <input type="range" id="lineYearMin" value="1960">
-      <input type="range" id="lineYearMax" value="2020">
-      <span id="lineYearLabel"></span>
-
-      <span style="margin-left:16px;">Metric:</span>
-      <div class="metric-group">
-        <label><input type="radio" name="metric" value="runs" checked> Runs/Game</label>
-        <label><input type="radio" name="metric" value="batting"> Hits/Game</label>
-        <label><input type="radio" name="metric" value="pitching"> Runs Allowed/Game</label>
-      </div>
-    </div>
-
-    <div class="chart-title" id="lineChartTitle">
-      League-Average Runs per Game by Year
-    </div>
-    <svg id="linechart"></svg>
+  <div>
+    <label for="teamFilter">Team:</label>
+    <select id="teamFilter">
+      <option value="All">All teams</option>
+    </select>
   </div>
 
-  <div class="tooltip" id="tooltip"></div>
+  <div class="metric-group">
+    <label><input type="radio" name="metric" value="runs" checked> Runs / Game</label>
+    <label><input type="radio" name="metric" value="batting"> Hits / Game</label>
+    <label><input type="radio" name="metric" value="strikeouts"> Strikeouts / Game</label>
+  </div>
+</div>
 
-  <!-- D3 -->
-  <script src="https://d3js.org/d3.v7.min.js"></script>
-  <!-- YOUR JS -->
-  <script src="main.js"></script>
+<div class="chart-container">
+  <div class="chart-title" id="lineChartTitle">
+    League-Average Runs per Game Over Time
+  </div>
+  <svg id="linechart"></svg>
+</div>
+
+<div class="tooltip" id="tooltip"></div>
+
+<script src="https://d3js.org/d3.v7.min.js"></script>
+<script src="main.js"></script>
 </body>
 </html>

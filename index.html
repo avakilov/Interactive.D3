@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>From Players to Teams: Performance Trends and Aging Patterns in Baseball History</title>
+  <style>
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      margin: 20px;
+      background: #f7f7f7;
+    }
+
+    h1 {
+      margin-bottom: 0.25rem;
+    }
+
+    p {
+      max-width: 900px;
+      font-size: 0.95rem;
+    }
+
+    .controls {
+      margin-top: 16px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+      align-items: center;
+      font-size: 14px;
+    }
+
+    .controls label {
+      font-weight: 500;
+      margin-right: 4px;
+    }
+
+    select {
+      padding: 3px 6px;
+      font-size: 13px;
+    }
+
+    .chart-container {
+      margin-top: 24px;
+      background: #ffffff;
+      border-radius: 10px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+      padding: 16px 20px 24px;
+    }
+
+    .chart-title {
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+
+    svg {
+      width: 100%;
+      height: 420px;
+    }
+
+    .axis-label {
+      font-size: 12px;
+      fill: #444;
+    }
+
+    .tooltip {
+      position: absolute;
+      padding: 6px 8px;
+      background: white;
+      border: 1px solid #999;
+      border-radius: 4px;
+      font-size: 12px;
+      pointer-events: none;
+      opacity: 0;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.15);
+    }
+
+    .slider-row {
+      margin-bottom: 10px;
+      font-size: 14px;
+      color: #333;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .metric-group {
+      display: inline-flex;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .legend {
+      font-size: 11px;
+    }
+
+    .legend rect {
+      stroke: #333;
+      stroke-width: 0.5px;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>MLB Teams – D3 Visualizations</h1>
+  <p>
+    This interactive visualization explores how baseball teams’ performance changes over time. 
+    Using historical team-season data, it shows how offensive production, batting, and pitching 
+    evolve across years and how individual teams compare to league-wide trends. 
+    Users can filter by league, select specific teams, and adjust the year range to focus on 
+    particular eras of baseball history. Hover over points on the line to see more details for each season.
+  </p>
+
+  <!-- GLOBAL CONTROLS (for the line chart) -->
+  <div class="controls">
+    <div>
+      <label for="leagueFilter">League:</label>
+      <select id="leagueFilter">
+        <option value="All">All leagues</option>
+      </select>
+    </div>
+
+    <div>
+      <label for="teamFilter">Team:</label>
+      <select id="teamFilter">
+        <option value="All">All teams</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- SINGLE LINE CHART -->
+  <div class="chart-container">
+    <div class="slider-row">
+      <span>Year Range:</span>
+      <input type="range" id="lineYearMin" value="1960">
+      <input type="range" id="lineYearMax" value="2020">
+      <span id="lineYearLabel"></span>
+
+      <span style="margin-left:16px;">Metric:</span>
+      <div class="metric-group">
+        <label><input type="radio" name="metric" value="runs" checked> Runs/Game</label>
+        <label><input type="radio" name="metric" value="batting"> Hits/Game</label>
+        <label><input type="radio" name="metric" value="pitching"> Runs Allowed/Game</label>
+      </div>
+    </div>
+
+    <div class="chart-title" id="lineChartTitle">
+      League-Average Runs per Game by Year
+    </div>
+    <svg id="linechart"></svg>
+  </div>
+
+  <div class="tooltip" id="tooltip"></div>
+
+  <!-- D3 -->
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+  <!-- YOUR JS -->
+  <script src="main.js"></script>
+</body>
+</html>

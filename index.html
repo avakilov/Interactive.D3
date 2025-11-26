@@ -28,16 +28,6 @@
       font-size: 14px;
     }
 
-    .controls label {
-      font-weight: 500;
-      margin-right: 4px;
-    }
-
-    select {
-      padding: 3px 6px;
-      font-size: 13px;
-    }
-
     .chart-container {
       margin-top: 24px;
       background: #ffffff;
@@ -92,23 +82,23 @@
 
   <h1>MLB Teams – D3 Visualizations</h1>
   <p>
-    This interactive line chart shows how team performance changes over time. 
-    You can filter by league (AL or NL), highlight a specific team, and adjust the year range. 
-    The chart can display runs per game, hits per game, or both at the same time. 
-    Hover over any point to see detailed information for that season.
+    Explore how MLB team performance changes over time using Runs/Game and Hits/Game.  
+    You can filter by league, highlight a specific team, and adjust the year range.
+    Hover over points to see details for each season.
   </p>
 
   <div class="controls">
     <div>
-      <label for="leagueFilter">League:</label>
+      <label>League:</label>
       <select id="leagueFilter">
+        <option value="All">All leagues</option>
         <option value="AL">AL</option>
         <option value="NL">NL</option>
       </select>
     </div>
 
     <div>
-      <label for="teamFilter">Team:</label>
+      <label>Team:</label>
       <select id="teamFilter">
         <option value="All">All teams</option>
       </select>
@@ -117,7 +107,7 @@
 
   <div class="chart-container">
     <div class="slider-row">
-      <span>Line Chart Year Range:</span>
+      <span>Year Range:</span>
       <input type="range" id="lineYearMin" />
       <input type="range" id="lineYearMax" />
       <span id="lineYearLabel"></span>
@@ -128,9 +118,7 @@
       <label><input type="radio" name="metric" value="hits"> Hits/Game</label>
     </div>
 
-    <div class="chart-title" id="lineChartTitle">
-      League-Average Runs and Hits per Game by Year
-    </div>
+    <div class="chart-title" id="lineChartTitle"></div>
     <svg id="linechart"></svg>
   </div>
 
